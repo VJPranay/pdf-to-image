@@ -16,8 +16,7 @@ def upload(request):
     timestamp = datetime.timestamp(datetime.now())
     path = default_storage.save('media/' + str(timestamp) + '.pdf', ContentFile(file.read()))
     tmp_file = os.path.join(settings.MEDIA_ROOT, path)
-    print(tmp_file)
-    images = convert_from_path(tmp_file)
+    images = convert_from_path(tmp_file, dpi=70)
     count = 0
     content = []
     for image in images:
@@ -25,11 +24,12 @@ def upload(request):
         count = count + 1
         temp['page'] = count
         real_image = "media/" + str(timestamp) + str(count) + ".webp"
-        image.save(real_image, "WEBP")
+        image.resize((1438, 922))
+        image.save(real_image, "webp", optimize=True, quality=7)
         temp['image'] = real_image
-        image.thumbnail((200, 200))
+        image.resize((119, 185))
         thumb = "media/" + str(timestamp) + str(count) + "-thumb.webp"
-        image.save(thumb, "WEBP")
+        image.save(thumb, "webp", optimize=True, quality=7)
         temp['thumb'] = thumb
         content.append(temp)
     return Response(content, status=status.HTTP_200_OK)
