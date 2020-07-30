@@ -8,6 +8,8 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 from datetime import datetime
+from .models import JsonData
+import ast
 
 
 @api_view(['POST'])
@@ -32,7 +34,18 @@ def upload(request):
         image.save(thumb, "webp", optimize=True, quality=7)
         temp['thumb'] = thumb
         content.append(temp)
+    finalc = JsonData.objects.create(
+        content=content
+    )
+    finalc.save()
     return Response(content, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def latest(request):
+    data = JsonData.objects.all().order_by('-id')[0]
+    return Response(ast.literal_eval(data.content), status=status.HTTP_200_OK)
+
 # except ValueError:
 #     content = {
 #         'message': "Please upload the file"
